@@ -1,0 +1,65 @@
+
+config interface 'loopback'
+	option ifname 'lo'
+	option proto 'static'
+	option ipaddr '127.0.0.1'
+	option netmask '255.0.0.0'
+
+config globals 'globals'
+	option ula_prefix 'fd57:0092:2a8c::/48'
+
+config interface 'lan'
+	option type 'bridge'
+	option ifname 'eth0.1'
+	option proto 'static'
+	option ipaddr '192.168.1.1'
+	option netmask '255.255.255.0'
+	list dns '192.168.2.254'
+
+config interface 'wan'
+	option ifname 'eth0.2'
+	option proto 'static'
+	option netmask '255.255.255.0'
+	option gateway '192.168.2.254'
+	option ipaddr '192.168.2.253'
+	list dns '192.168.2.254'
+
+config device 'wan_eth0_2_dev'
+	option name 'eth0.2'
+	option macaddr 'xxxxxxxxxx'
+
+config interface 'wan6'
+	option ifname 'eth0.2'
+	option proto 'dhcpv6'
+
+config switch
+	option name 'switch0'
+	option reset '1'
+	option enable_vlan '1'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '1'
+	option vid '1'
+	option ports '5 4 2 0t'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '2'
+	option ports '1 0t'
+	option vid '2'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '3'
+	option vid '10'
+	option ports '3 0t'
+
+config interface 'vlan10'
+	option proto 'static'
+	option netmask '255.255.255.0'
+	option ifname 'eth0.10'
+	option ipaddr '192.168.10.1'
+	option type 'bridge'
+	list dns '192.168.2.254'
+
