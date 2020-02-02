@@ -17,6 +17,7 @@ For the gateway and DNS server set the modem as ip address i.e. 192.168.2.254.
 
 If you like to like the router to also act as the DHCP server, activate that.
 
+/etc/config/network
 ```
 config interface 'wan'
         option ifname 'eth0.2'
@@ -33,8 +34,37 @@ config switch_vlan
         option vid '2'
 ```
 
-## Set up VLAN
+/etc/config/dhcp
+```
+config dhcp 'wan'
+        option interface 'wan'
+        option start '100'
+        option leasetime '12h'
+        option limit '150'
+```
 
+## Set up VLAN for guest
+Add a new vlan with a specific vlan id.
+Make sure the CPU is tagged.
+Any other port that is tagged will need the vlan id to access.
+
+In the switch section, a new vlan should be created.
+Also in the interfaces section, a new interface should be created for
+the vlan.
+This vlan should define the wireless access point (e.g. SSID) that will be in this vlan.
+To do this, you need to bridge the wireless guest interface.
+
+Give this vlan an static address with its own static ip.
+Gateway needs not to be set up.
+For the DNS server you can use the modem's DNS server (e.g. 192.168.2.254).
+Which is in a different vlan.
+
+DHCP will also be setup to let guests get a DHCP address.
+The gateway needs not be set.
+
+Also a firewall needs to be set up so the guests cannot access the rest of the network.
+
+/etc/config/network
 ```
 config switch_vlan
         option device 'switch0'
@@ -51,6 +81,15 @@ config interface 'vlan10'
         list dns '192.168.2.254'
 ```
 
+/etc/config/dhcp
+```
+config dhcp 'vlan10'
+        option start '100'
+        option leasetime '12h'
+        option interface 'vlan10'
+        option limit '50'
+```
+
 ## Set up Firewall
 The firewall will be set up to block the guest VLAN from accessing other VLANs
 VLAN 10 is the guest VLAN. 
@@ -64,6 +103,7 @@ Finally we would like to allow people connecting to the guest wifi (or vlan10) t
 be able to get a private ip address and can reach the DNS server.
 For this we need to allow port 67 for DHCP and port 53 for DNS.
 
+/etc/config/firewall
 ```
 config zone
         option network 'vlan10'
