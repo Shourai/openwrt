@@ -5,9 +5,51 @@ The goal of this configuration is to place the guest wifi into a seperate vlan c
 separated from the rest of the ecosystem.
 
 ## Use WLAN port as lan port
+In a dumb AP setup, it would be nice to be able to use the WAN port
+as the port that is connected to the modem.
+The default settings of openwrt puts the WAN interface on vlan 2 with WAN untagged.
+and CPU tagged.
 
+Set up the WAN interface with a static address.
+With a private ip in the 192.168.2.0/24 range.
+E.g. if you have the modem set to 192.168.2.254, set the private ip as 192.168.2.253.
+For the gateway and DNS server set the modem as ip address i.e. 192.168.2.254.
+
+If you like to like the router to also act as the DHCP server, activate that.
+
+```
+config interface 'wan'
+        option ifname 'eth0.2'
+        option proto 'static'
+        option netmask '255.255.255.0'
+        option gateway '192.168.2.254'
+        option ipaddr '192.168.2.253'
+        list dns '192.168.2.254'
+
+config switch_vlan
+        option device 'switch0'
+        option vlan '2'
+        option ports '1 0t'
+        option vid '2'
+```
 
 ## Set up VLAN
+
+```
+config switch_vlan
+        option device 'switch0'
+        option vlan '3'
+        option vid '10'
+        option ports '3 0t'
+
+config interface 'vlan10'
+        option proto 'static'
+        option netmask '255.255.255.0'
+        option ifname 'eth0.10'
+        option ipaddr '192.168.10.1'
+        option type 'bridge'
+        list dns '192.168.2.254'
+```
 
 ## Set up Firewall
 The firewall will be set up to block the guest VLAN from accessing other VLANs
