@@ -1,7 +1,7 @@
 # Documentation of openWRT settings
 
 All configuration files are located at /etc/config/
-The goal of this configuration is to place the guest wifi into a seperate vlan completely
+The goal of this configuration is to place the guest wifi into a separate vlan completely
 separated from the rest of the ecosystem.
 
 ## Use WLAN port as lan port
@@ -16,6 +16,8 @@ E.g. if you have the modem set to 192.168.2.254, set the private ip as 192.168.2
 For the gateway and DNS server set the modem as ip address i.e. 192.168.2.254.
 
 If you like to like the router to also act as the DHCP server, activate that.
+
+Be sure to accept input, forward and output in firewall.
 
 /etc/config/network
 ```
@@ -64,6 +66,8 @@ The gateway needs not be set.
 
 Also a firewall needs to be set up so the guests cannot access the rest of the network.
 
+Be sure to forward the firewall zone to WAN, to be able to access the internet.
+
 /etc/config/network
 ```
 config switch_vlan
@@ -106,6 +110,16 @@ For this we need to allow port 67 for DHCP and port 53 for DNS.
 /etc/config/firewall
 ```
 config zone
+        option name 'wan'
+        list network 'wan'
+        list network 'wan6'
+        option output 'ACCEPT'
+        option masq '1'
+        option mtu_fix '1'
+        option input 'ACCEPT'
+        option forward 'ACCEPT'
+
+config zone
         option network 'vlan10'
         option name 'vlan10'
         option output 'ACCEPT'
@@ -134,6 +148,14 @@ config forwarding
         option dest 'lan'
         option src 'wan'
 ```
+
+## Other connected devices
+As default, vlan1 is called lan.
+This vlan can be used for the regular wireless access points.
+Set this vlan interface up with a static address and DHCP.
+
+e.g. 192.168.1.1 as static address and 192.168.2.254 as DNS server.
+
 
 ## Other settings
 If you are using the openwrt router as a dumb access point.
